@@ -1,0 +1,7 @@
+/node_modules/
+
+# ignore litecanvas local copy
+/litecanvas/
+
+# ignore lock files
+/*lock*
