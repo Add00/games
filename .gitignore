@@ -1,7 +1,7 @@
 /node_modules/
 
 # ignore litecanvas local copy
-/litecanvas/
+/common/litecanvas.js
 
 # ignore lock files
 /*lock*
