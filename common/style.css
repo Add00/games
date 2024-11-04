@@ -1,0 +1,29 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    line-height: 1.4;
+}
+
+h1,
+h2,
+h3 {
+    line-height: 1.2;
+}
+
+main {
+    width: 800px;
+    margin: auto;
+}
+
+kbd {
+    background-color: #eee;
+    border-radius: 3px;
+    border: 1px solid #b4b4b4;
+    color: #222;
+    display: inline-block;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1;
+    padding: 2px 4px;
+    margin-right: 1em;
+}

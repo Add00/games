@@ -1,12 +1,13 @@
 {
-  "name": "games",
-  "version": "1",
-  "type": "module",
-  "scripts": {
-    "copy-files": "node script/copy.js",
-    "dev": "npm run copy-files && npx live-server"
-  },
-  "dependencies": {
-    "litecanvas": "0.*"
-  }
+    "name": "games",
+    "version": "1",
+    "type": "module",
+    "scripts": {
+        "copy-files": "node script/copy.js",
+        "dev": "npm run copy-files && npx live-server",
+        "format": "npx prettier -w games common"
+    },
+    "dependencies": {
+        "litecanvas": "0.*"
+    }
 }
