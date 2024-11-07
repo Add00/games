@@ -7,7 +7,7 @@ Repository with source code of simple games made with Litecanvas.
 ```
 git clone https://github.com/litecanvas/games/
 cd games
-npm i
+npm install
 npm run dev
 ```
 
