@@ -8,12 +8,12 @@ const SCREEN_WIDTH = innerWidth > 800 ? 800 : innerWidth,
     BULLET_DELAY = 0.5,
     ASTEROID_STAGES = [
         {
-            size: 80,
+            size: 70,
             speed: 125,
         },
         {
-            size: 20,
-            speed: 500,
+            size: 15,
+            speed: 400,
         },
     ],
     // sounds made with https://killedbyapixel.github.io/ZzFX/
@@ -22,21 +22,21 @@ const SCREEN_WIDTH = innerWidth > 800 ? 800 : innerWidth,
     SOUND_VICTORY = [,,284,.08,.2,.25,1,3,,,50,.09,.06,,,,,.6,.28,.03,-1391], // prettier-ignore
     // game objects
     ship = {
-        size: 30,
+        size: 25,
         speed: {},
         lastShot: 0,
     },
     asteroids = new Set(),
     bullets = new Set();
 
-let gameState = "";
-
-litecanvas({
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-    canvas: "#game canvas",
-    autoscale: false,
-});
+let gameState = "",
+    engine = litecanvas({
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT,
+        canvas: "#game canvas",
+        autoscale: false,
+    }),
+    graphics = makeGraphics(engine);
 
 function init() {
     ship.x = CENTERX;
@@ -89,7 +89,7 @@ function draw() {
     }
 
     textsize(16);
-    text(0, 0, "FPS: " + FPS);
+    // text(0, 0, "FPS: " + FPS);
 }
 
 function updateShip(dt) {
@@ -120,19 +120,13 @@ function updateShip(dt) {
 }
 
 function drawShip() {
-    // draw a blue circle
-    circfill(ship.x, ship.y, ship.size, 6);
-
-    // draw a line to indicate the ship angle
-    let radians = deg2rad(ship.angle);
-    linewidth(2);
-    line(
-        ship.x + cos(radians) * (ship.size / 2),
-        ship.y + sin(radians) * (ship.size / 2),
-        ship.x + cos(radians) * ship.size,
-        ship.y + sin(radians) * ship.size,
-        7
-    );
+    const sprite = graphics.ship;
+    const radians = deg2rad(ship.angle);
+    push();
+    translate(ship.x, ship.y);
+    rotate(HALF_PI + radians);
+    image(-sprite.width / 2, -sprite.height / 2, sprite);
+    pop();
 }
 
 function shotBullet(dt) {
@@ -217,7 +211,13 @@ function updateAsteroids(dt) {
 
 function drawAsteroids() {
     for (const a of asteroids) {
-        circfill(a.x, a.y, a.size, 5);
+        const sprite = graphics["asteroidStage" + a.stage];
+        // const radians = deg2rad(ship.angle);
+        push();
+        translate(a.x, a.y);
+        // rotate(HALF_PI + radians);
+        image(-sprite.width / 2, -sprite.height / 2, sprite);
+        pop();
     }
 }
 
