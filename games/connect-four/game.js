@@ -11,7 +11,20 @@ let gameState = "",
     graphics = makeGraphics(engine);
 
 let selectorDelay = 0;
-const selectorDelayMax = 0.2; // 500 milliseconds delay
+const selectorDelayMax = 0.1;
+let pieceDelay = 0;
+const pieceDelayMax = 0.1;
+
+let selector = {
+    // Middle of columns are: 142, 225, 305, 388, 468, 550, 630
+    x: [142, 225, 305, 388, 468, 550, 630],
+    y: 55,
+    angle: 0,
+};
+
+let selected = 0;
+
+let falling = null;
 
 function init() {
     bg = 0;
@@ -30,8 +43,9 @@ function init() {
     for (let i = 0; i < 6; i++) {
         game_board.push([0, 0, 0, 0, 0, 0, 0]);
     }
-    p1_wins = 0;
-    p2_wins = 0;
+    board_full = false;
+    p1_wins = false;
+    p2_wins = false;
     player = 1;
 
     gameState = "playing";
@@ -40,18 +54,12 @@ function init() {
 function update(dt) {
     if (gameState !== "playing") return;
     updateSelector(dt);
+    updateFalling(dt);
 }
 
 function draw() {
     cls(bg); // clear the screen
-    text(SCREEN_WIDTH / 2.5, 10, "Connect Four Demo", 3);
-    text(SCREEN_WIDTH / 2.35, 35, "Player ", 3);
-    if (player === 1) {
-        text(SCREEN_WIDTH / 2.35 + 50, 35, player, red);
-    } else {
-        text(SCREEN_WIDTH / 2.35 + 50, 35, player, yellow);
-    }
-    text(SCREEN_WIDTH / 2.35 + 60, 35, "'s turn.", 3);
+    drawTitle();
     drawBoard();
     drawPieces();
     drawSelector();
@@ -64,16 +72,35 @@ function draw() {
         textalign("center", "middle");
         textsize(96);
 
+        let win = "";
+        if (p1_wins) {
+            win = "Player 1 Wins!";
+        } else if (p2_wins) {
+            win = "Player 2 Wins!";
+        }
         if (gameState === "game-over") {
-            text(CENTERX, CENTERY, "GAME OVER!");
+            text(CENTERX, CENTERY, "Draw!");
         } else if (gameState === "victory") {
-            text(CENTERX, CENTERY, "YOU WIN!");
+            text(CENTERX, CENTERY, win);
         }
         pop();
     }
 
     textsize(16);
     // text(0, 0, "FPS: " + FPS);
+}
+
+function drawTitle() {
+    textalign("center", "middle");
+    // text(CENTERX, 10, "Connect Four Demo", 3);
+    textsize(30);
+    text(CENTERX - 50, 35, "Player ", 3);
+    if (player === 1) {
+        text(CENTERX + 5, 35, player, red);
+    } else {
+        text(CENTERX + 5, 35, player, yellow);
+    }
+    text(CENTERX + 60, 35, "'s turn", 3);
 }
 
 function drawPieces() {
@@ -87,11 +114,9 @@ function drawPieces() {
             } else if (game_board[row][col] === 1) {
                 // Draw player 1's piece
                 circfill(x, y, radius, red);
-                circ(x, y, radius, bg);
             } else if (game_board[row][col] === 2) {
                 // Draw player 2's piece
                 circfill(x, y, radius, yellow);
-                circ(x, y, radius, bg);
             }
         }
     }
@@ -99,7 +124,7 @@ function drawPieces() {
 
 function drawBoard() {
     // draw the board borders
-    rectfill(110, 90, boardw, boardh, blue);
+    rectfill(110, 90, boardw, boardh, blue, 20);
     // Draw the board feet
     rectfill(30, 571, 200, 20, blue, radius);
     rectfill(boardw - 5, 571, 200, 20, blue, radius);
@@ -118,23 +143,6 @@ function drawBoard() {
     rect(colw + 30, 90 + colh * 4, boardw, colw, blue);
     */
 }
-
-function tapped(x, y) {
-    if (player == 1) {
-        player = 2;
-    } else {
-        player = 1;
-    }
-}
-
-let selector = {
-    // Middle of columns are: 142, 225, 305, 388, 468, 550, 630
-    x: [142, 225, 305, 388, 468, 550, 630],
-    y: 55,
-    angle: 0,
-};
-
-let selected = 0;
 
 function drawSelector() {
     const sprite = graphics.selector;
@@ -177,11 +185,136 @@ function dropPiece() {
     for (let i = 5; i >= 0; i--) {
         if (game_board[i][selected] === 0) {
             found = true;
-            game_board[i][selected] = player;
+            falling = {
+                row: -1,
+                col: selected,
+                targetRow: i,
+                player: player,
+            };
             break;
         }
     }
     if (found) {
         player = player === 1 ? 2 : 1;
     }
+}
+
+function updateFalling(dt) {
+    if (falling === null) return;
+
+    // Update the delay timer
+    if (pieceDelay > 0) {
+        pieceDelay -= dt;
+        return;
+    }
+
+    // Move the piece down
+    if (falling.row < falling.targetRow) {
+        if (falling.row >= 0) {
+            game_board[falling.row][falling.col] = 0;
+        }
+        falling.row++;
+        game_board[falling.row][falling.col] = falling.player;
+        pieceDelay = pieceDelayMax; // Reset the delay timer
+    } else {
+        checkWinner(falling.player);
+        falling = null;
+    }
+}
+
+function checkWinner(player) {
+    // check columns
+    for (let i = 0; i < 7; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (
+                game_board[j][i] === player &&
+                game_board[j + 1][i] === player &&
+                game_board[j + 2][i] === player &&
+                game_board[j + 3][i] === player
+            ) {
+                if (falling.player === 1) {
+                    p1_wins = true;
+                } else {
+                    p2_wins = true;
+                }
+                gameState = "victory";
+                return;
+            }
+        }
+    }
+
+    // check rows
+    for (let i = 0; i < 6; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (
+                game_board[i][j] === player &&
+                game_board[i][j + 1] === player &&
+                game_board[i][j + 2] === player &&
+                game_board[i][j + 3] === player
+            ) {
+                if (falling.player === 1) {
+                    p1_wins = true;
+                } else {
+                    p2_wins = true;
+                }
+                gameState = "victory";
+                return;
+            }
+        }
+    }
+
+    // check diagonals (bottom-left to top-right)
+    for (let row = 3; row < 6; row++) {
+        for (let col = 0; col < 4; col++) {
+            if (
+                game_board[row][col] === player &&
+                game_board[row - 1][col + 1] === player &&
+                game_board[row - 2][col + 2] === player &&
+                game_board[row - 3][col + 3] === player
+            ) {
+                if (falling.player === 1) {
+                    p1_wins = true;
+                } else {
+                    p2_wins = true;
+                }
+                gameState = "victory";
+                return;
+            }
+        }
+    }
+
+    // check diagonals (top-left to bottom-right)
+    for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 4; col++) {
+            if (
+                game_board[row][col] === player &&
+                game_board[row + 1][col + 1] === player &&
+                game_board[row + 2][col + 2] === player &&
+                game_board[row + 3][col + 3] === player
+            ) {
+                if (falling.player === 1) {
+                    p1_wins = true;
+                } else {
+                    p2_wins = true;
+                }
+                gameState = "victory";
+                return;
+            }
+        }
+    }
+
+    // check for a full board
+    if (isBoardFull()) {
+        gameState = "game-over";
+    }
+}
+
+function isBoardFull() {
+    // returns true if the board is full, checks the top row
+    for (let col = 0; col < 7; col++) {
+        if (game_board[0][col] === 0) {
+            return false;
+        }
+    }
+    return true;
 }
