@@ -10,6 +10,9 @@ let gameState = "",
     }),
     graphics = makeGraphics(engine);
 
+let selectorDelay = 0;
+const selectorDelayMax = 0.2; // 500 milliseconds delay
+
 function init() {
     bg = 0;
     blue = 6;
@@ -36,13 +39,18 @@ function init() {
 
 function update(dt) {
     if (gameState !== "playing") return;
+    updateSelector(dt);
 }
 
 function draw() {
     cls(bg); // clear the screen
     text(SCREEN_WIDTH / 2.5, 10, "Connect Four Demo", 3);
     text(SCREEN_WIDTH / 2.35, 35, "Player ", 3);
-    text(SCREEN_WIDTH / 2.35 + 50, 35, player, 3);
+    if (player === 1) {
+        text(SCREEN_WIDTH / 2.35 + 50, 35, player, red);
+    } else {
+        text(SCREEN_WIDTH / 2.35 + 50, 35, player, yellow);
+    }
     text(SCREEN_WIDTH / 2.35 + 60, 35, "'s turn.", 3);
     drawBoard();
     drawPieces();
@@ -68,11 +76,6 @@ function draw() {
     // text(0, 0, "FPS: " + FPS);
 }
 
-function update() {
-    if (gameState !== "playing") return;
-    updateSelector();
-}
-
 function drawPieces() {
     for (let row = 0; row < game_board.length; row++) {
         for (let col = 0; col < game_board[row].length; col++) {
@@ -84,9 +87,11 @@ function drawPieces() {
             } else if (game_board[row][col] === 1) {
                 // Draw player 1's piece
                 circfill(x, y, radius, red);
+                circ(x, y, radius, bg);
             } else if (game_board[row][col] === 2) {
                 // Draw player 2's piece
                 circfill(x, y, radius, yellow);
+                circ(x, y, radius, bg);
             }
         }
     }
@@ -106,7 +111,6 @@ function drawBoard() {
     rectfill(colw * 4 + 30, 90, colw, boardh, blue);
     rectfill(colw * 5 + 30, 90, colw, boardh, blue);
     rectfill(colw * 6 + 30, 90, colw, boardh, blue);
-    rectfill(colw * 7 + 30, 90, colw, boardh, blue);
     // Draw the horizontal cols
     rect(colw + 30, 90 + colh, boardw, colw, blue);
     rect(colw + 30, 90 + colh * 2, boardw, colw, blue);
@@ -115,7 +119,6 @@ function drawBoard() {
     */
 }
 
-// this function detect taps/clicks
 function tapped(x, y) {
     if (player == 1) {
         player = 2;
@@ -126,7 +129,7 @@ function tapped(x, y) {
 
 let selector = {
     // Middle of columns are: 142, 225, 305, 388, 468, 550, 630
-    x: [142, 225, 305, 388, 468, 550],
+    x: [142, 225, 305, 388, 468, 550, 630],
     y: 55,
     angle: 0,
 };
@@ -143,17 +146,42 @@ function drawSelector() {
     pop();
 }
 
-function updateSelector() {
+function updateSelector(dt) {
+    // Update the delay timer
+    if (selectorDelay > 0) {
+        selectorDelay -= dt;
+    }
+
     // Move selector left
-    if (iskeydown("ArrowLeft")) {
+    if (iskeydown("ArrowLeft") && selectorDelay <= 0) {
         if (selected > 0) {
             selected--;
+            selectorDelay = selectorDelayMax; // Reset the delay timer
         }
     }
     // Move selector right
-    if (iskeydown("ArrowRight")) {
-        if (selected < 6) {
+    if (iskeydown("ArrowRight") && selectorDelay <= 0) {
+        if (selected <= 5) {
             selected++;
+            selectorDelay = selectorDelayMax; // Reset the delay timer
         }
+    }
+    if (iskeydown("ArrowDown") && selectorDelay <= 0) {
+        selectorDelay = selectorDelayMax + 1; // Reset the delay timer
+        dropPiece();
+    }
+}
+
+function dropPiece() {
+    let found = false;
+    for (let i = 5; i >= 0; i--) {
+        if (game_board[i][selected] === 0) {
+            found = true;
+            game_board[i][selected] = player;
+            break;
+        }
+    }
+    if (found) {
+        player = player === 1 ? 2 : 1;
     }
 }
