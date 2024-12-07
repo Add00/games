@@ -47,12 +47,17 @@ function init() {
     p1_wins = false;
     p2_wins = false;
     player = 1;
+    p1_win_counter = 0;
+    p2_win_counter = 0;
 
     gameState = "playing";
 }
 
 function update(dt) {
-    if (gameState !== "playing") return;
+    if (gameState !== "playing") {
+        updateReplay(dt);
+        return;
+    }
     updateSelector(dt);
     updateFalling(dt);
 }
@@ -63,6 +68,7 @@ function draw() {
     drawBoard();
     drawPieces();
     drawSelector();
+    drawScore();
 
     if (gameState !== "playing") {
         push();
@@ -88,6 +94,30 @@ function draw() {
 
     textsize(16);
     // text(0, 0, "FPS: " + FPS);
+}
+
+function replay() {
+    if (p1_wins) {
+        player = 1;
+    } else {
+        player = 2;
+    }
+    // Set up the board
+    game_board = [];
+    for (let i = 0; i < 6; i++) {
+        game_board.push([0, 0, 0, 0, 0, 0, 0]);
+    }
+    board_full = false;
+    p1_wins = false;
+    p2_wins = false;
+    gameState = "playing";
+}
+
+function drawScore() {
+    textalign("left", "top");
+    text(10, 10, "P1: " + p1_win_counter, 3);
+    textalign("right", "top");
+    text(790, 10, "P2: " + p2_win_counter, 3);
 }
 
 function drawTitle() {
@@ -152,6 +182,12 @@ function drawSelector() {
     rotate(HALF_PI + radians);
     image(-sprite.width / 2, -sprite.height / 2, sprite);
     pop();
+}
+
+function updateReplay(dt) {
+    if (iskeydown("r")) {
+        replay();
+    }
 }
 
 function updateSelector(dt) {
@@ -233,8 +269,10 @@ function checkWinner(player) {
                 game_board[j + 3][i] === player
             ) {
                 if (falling.player === 1) {
+                    p1_win_counter++;
                     p1_wins = true;
                 } else {
+                    p2_win_counter++;
                     p2_wins = true;
                 }
                 gameState = "victory";
@@ -253,8 +291,10 @@ function checkWinner(player) {
                 game_board[i][j + 3] === player
             ) {
                 if (falling.player === 1) {
+                    p1_win_counter++;
                     p1_wins = true;
                 } else {
+                    p2_win_counter++;
                     p2_wins = true;
                 }
                 gameState = "victory";
@@ -274,7 +314,9 @@ function checkWinner(player) {
             ) {
                 if (falling.player === 1) {
                     p1_wins = true;
+                    p1_win_counter++;
                 } else {
+                    p2_win_counter++;
                     p2_wins = true;
                 }
                 gameState = "victory";
@@ -294,7 +336,9 @@ function checkWinner(player) {
             ) {
                 if (falling.player === 1) {
                     p1_wins = true;
+                    p1_win_counter++;
                 } else {
+                    p2_win_counter++;
                     p2_wins = true;
                 }
                 gameState = "victory";
@@ -305,6 +349,8 @@ function checkWinner(player) {
 
     // check for a full board
     if (isBoardFull()) {
+        p1_win_counter++;
+        p2_win_counter++;
         gameState = "game-over";
     }
 }
