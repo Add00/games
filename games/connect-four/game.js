@@ -49,6 +49,7 @@ function init() {
     player = 1;
     p1_win_counter = 0;
     p2_win_counter = 0;
+    volume(1);
 
     gameState = "playing";
 }
@@ -115,9 +116,9 @@ function replay() {
 
 function drawScore() {
     textalign("left", "top");
-    text(10, 10, "P1: " + p1_win_counter, 3);
+    text(10, 10, "P1: " + p1_win_counter, red);
     textalign("right", "top");
-    text(790, 10, "P2: " + p2_win_counter, 3);
+    text(790, 10, "P2: " + p2_win_counter, yellow);
 }
 
 function drawTitle() {
@@ -186,6 +187,10 @@ function drawSelector() {
 
 function updateReplay(dt) {
     if (iskeydown("r")) {
+        sfx([
+            1.1, 0.05, 157, 0.03, 0.04, 0.04, 4, 4.9, 78, -13, 0, 0, 0.07, 0, 0,
+            0, 0, 0.91, 0.02, 0.33, 0,
+        ]);
         replay();
     }
 }
@@ -200,6 +205,10 @@ function updateSelector(dt) {
     if (iskeydown("ArrowLeft") && selectorDelay <= 0) {
         if (selected > 0) {
             selected--;
+            sfx([
+                1.5, 0.05, 24, 0.01, 0.02, 0.01, 1, 3.9, -33, 0, 0, 0, 0, 0,
+                355, 0, 0, 0.65, 0, 0, 0,
+            ]);
             selectorDelay = selectorDelayMax; // Reset the delay timer
         }
     }
@@ -207,11 +216,19 @@ function updateSelector(dt) {
     if (iskeydown("ArrowRight") && selectorDelay <= 0) {
         if (selected <= 5) {
             selected++;
+            sfx([
+                1.5, 0.05, 24, 0.01, 0.02, 0.01, 1, 3.9, -33, 0, 0, 0, 0, 0,
+                355, 0, 0, 0.65, 0, 0, 0,
+            ]);
             selectorDelay = selectorDelayMax; // Reset the delay timer
         }
     }
     if (iskeydown("ArrowDown") && selectorDelay <= 0) {
         selectorDelay = selectorDelayMax + 1; // Reset the delay timer
+        sfx([
+            2, 0.05, 226, 0, 0.08, 0.13, 0, 3.1, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.02,
+            0.76, 0.04, 0, 105,
+        ]);
         dropPiece();
     }
 }
@@ -275,6 +292,10 @@ function checkWinner(player) {
                     p2_win_counter++;
                     p2_wins = true;
                 }
+                sfx([
+                    1.3, 0, 130.81, 0.32, 0.35, 0.5, 3, 5.2, 0, 1, 50, 0, 0.14,
+                    0, 0, 0, 0, 0.37, 0.04, 0.24, 0,
+                ]);
                 gameState = "victory";
                 return;
             }
@@ -297,6 +318,10 @@ function checkWinner(player) {
                     p2_win_counter++;
                     p2_wins = true;
                 }
+                sfx([
+                    1.3, 0, 130.81, 0.32, 0.35, 0.5, 3, 5.2, 0, 1, 50, 0, 0.14,
+                    0, 0, 0, 0, 0.37, 0.04, 0.24, 0,
+                ]);
                 gameState = "victory";
                 return;
             }
@@ -319,6 +344,10 @@ function checkWinner(player) {
                     p2_win_counter++;
                     p2_wins = true;
                 }
+                sfx([
+                    1.3, 0, 130.81, 0.32, 0.35, 0.5, 3, 5.2, 0, 1, 50, 0, 0.14,
+                    0, 0, 0, 0, 0.37, 0.04, 0.24, 0,
+                ]);
                 gameState = "victory";
                 return;
             }
@@ -341,6 +370,10 @@ function checkWinner(player) {
                     p2_win_counter++;
                     p2_wins = true;
                 }
+                sfx([
+                    1.3, 0, 130.81, 0.32, 0.35, 0.5, 3, 5.2, 0, 1, 50, 0, 0.14,
+                    0, 0, 0, 0, 0.37, 0.04, 0.24, 0,
+                ]);
                 gameState = "victory";
                 return;
             }
@@ -351,7 +384,12 @@ function checkWinner(player) {
     if (isBoardFull()) {
         p1_win_counter++;
         p2_win_counter++;
+        sfx([
+            2, 0, 262.63, 0.1, 0.12, 0.3, 0, 2.4, -0.1, 0, 0, 0, 0.24, 0, 0,
+            0.1, 0.05, 0.98, 0.07, 0.17, 0,
+        ]);
         gameState = "game-over";
+        return;
     }
 }
 
