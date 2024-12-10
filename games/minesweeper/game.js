@@ -24,7 +24,7 @@ const SYMBOL = {
 
 const ROWS = 10;
 const COLS = 10;
-const DIFF = 1;
+const DIFF = 10;
 const TILE_SIZE = 34;
 
 const MODE = 'PLAY'; // DEBUG | PLAY
