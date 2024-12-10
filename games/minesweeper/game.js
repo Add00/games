@@ -24,7 +24,7 @@ const SYMBOL = {
 
 const ROWS = 10;
 const COLS = 10;
-const DIFF = 10;
+const DIFF = 1;
 const TILE_SIZE = 34;
 
 const MODE = 'PLAY'; // DEBUG | PLAY
@@ -229,6 +229,8 @@ emitter.on('tap:pending', (data) => {
         return;
     }
 
+    // sfx([1,0,261.6256,.04,.2,.34,1,.3,0,0,0,0,.2,0,0,0,0,.83,.19,.08,0], rand(), 0.5);
+
     tile.setHover();
 });
 emitter.on('tap:flag', (data) => {
@@ -296,6 +298,13 @@ emitter.on('tap:cancel', (data) => {
 emitter.on('game:end', (data) => {
     state = data;
 
+    if (state === 'game:loss') {
+        sfx([.6,.05,80,.02,.18,.51,3,2,-6,0,0,0,0,1.3,0,.4,0,.49,.28,0,-2957]);
+    }
+    else if (state === 'game:won') {
+        sfx([1.5,.05,690,.03,.22,.44,0,2.2,0,0,0,0,.05,0,0,.2,.12,.83,.2,.13,0]);
+    }
+
     gameTimer.pause();
     board.revealAll();
     emitter.clear();
@@ -304,6 +313,7 @@ emitter.on('game:end', (data) => {
 });
 
 function init() {
+    volume(1);
     gameTimer.start();
 
     console.log(board);
@@ -363,8 +373,8 @@ function draw() {
                 rectfill(x, y, TILE_SIZE - 1, TILE_SIZE - 1, COLOR.SLATE);
             }
 
-            if (tile._mine && tile._flagged && (state === 'game:loss' || state === 'game:won')) {
-                rectfill(x, y, TILE_SIZE - 1, TILE_SIZE - 1, COLOR.RED);
+            if (!tile._mine && tile._flagged && (state === 'game:loss' || state === 'game:won')) {
+                rectfill(x, y, TILE_SIZE - 1, TILE_SIZE - 1, COLOR.BROWN);
             }
 
             // text
