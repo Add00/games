@@ -222,7 +222,7 @@ let state = 'game:play';
 let flagCounter = DIFF;
 
 const emitter = new EventEmitter();
-emitter.on('tap:pending', (data) => {
+engine.listen('tap:pending', (data) => {
     const tile = board.at({ x: data.row, y: data.col });
 
     if (tile._revealed || tile._hover || tile._flagged) {
@@ -233,7 +233,7 @@ emitter.on('tap:pending', (data) => {
 
     tile.setHover();
 });
-emitter.on('tap:flag', (data) => {
+engine.listen('tap:flag', (data) => {
     const tile = board.at({ x: data.row, y: data.col });
 
     if (tile._revealed) {
@@ -252,7 +252,7 @@ emitter.on('tap:flag', (data) => {
 
     console.log(tile);
 });
-emitter.on('tap:reveal', (data) => {
+engine.listen('tap:reveal', (data) => {
     const tile = board.at({ x: data.row, y: data.col });
 
     if (tile._flagged) {
@@ -267,7 +267,7 @@ emitter.on('tap:reveal', (data) => {
     tile.setRevealed();
 
     if (tile._mine) {
-        emitter.emit('game:end', 'game:loss');
+        engine.emit('game:end', 'game:loss');
 
         return;
     }
@@ -284,18 +284,18 @@ emitter.on('tap:reveal', (data) => {
     state = won ? 'game:won' : 'game:play';
 
     if (won) {
-        emitter.emit('game:end', 'game:won');
+        engine.emit('game:end', 'game:won');
     }
 
     console.log(tile);
 });
-emitter.on('tap:cancel', (data) => {
+engine.listen('tap:cancel', (data) => {
     const tile = board.at({ x: data.row, y: data.col });
     tile.unsetHover();
 
     console.log(tile);
 });
-emitter.on('game:end', (data) => {
+engine.listen('game:end', (data) => {
     state = data;
 
     if (state === 'game:loss') {
@@ -307,7 +307,7 @@ emitter.on('game:end', (data) => {
 
     gameTimer.pause();
     board.revealAll();
-    emitter.clear();
+    unlisten();
 
     console.log(board);
 });
@@ -432,7 +432,7 @@ function tap(x, y, tapId) {
 
     const { row, col } = position;
 
-    emitter.emit('tap:pending', { row, col });
+    engine.emit('tap:pending', { row, col });
     interactionTimer.start();
 }
 
@@ -447,9 +447,9 @@ function untap(x, y, tapId) {
     interactionTimer.end();
 
     if (interactionTimer.isHold()) {
-        emitter.emit('tap:flag', { row, col });
+        engine.emit('tap:flag', { row, col });
     } else {
-        emitter.emit('tap:reveal', { row, col });
+        engine.emit('tap:reveal', { row, col });
     }
 }
 
@@ -466,7 +466,7 @@ function tapping(x, y, tapId) {
     interactionTimer.end();
 
     if (!pervious.equals(new Coordinate(row, col))) {
-        emitter.emit('tap:cancel', { row, col });
+        engine.emit('tap:cancel', { row, col });
         pervious.set(row, col);
     }
 }
